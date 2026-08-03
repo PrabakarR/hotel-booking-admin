@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cedar Ridge Lodge — Hotel Booking Admin (MVP)
 
-## Getting Started
+Internal staff dashboard for room booking management. Built with Next.js 16 (App Router), TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, Zod, Zustand, and Framer Motion.
 
-First, run the development server:
+The UI talks to a **service → repository** layer backed by realistic mock JSON today. Swap repositories to NestJS later without rewriting pages.
+
+## Quick start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo login
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Email: `admin@hotel.com`
+- Password: `password123`
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` — development server
+- `npm run build` — production build
+- `npm run start` — start production server
+- `npm run lint` — ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+UI pages / forms
+  → TanStack Query hooks
+    → services/          (use-case API)
+      → repositories/    (data access)
+        → mock store     (today)
+        → NestJS HTTP    (later via lib/api-client.ts)
+```
 
-## Deploy on Vercel
+### NestJS swap path
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Set `NEXT_PUBLIC_API_URL` (see `.env.example`).
+2. Implement HTTP repositories that call NestJS using `apiClient` in `src/lib/api-client.ts`.
+3. Keep service method signatures the same so hooks and pages stay unchanged.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Features
+
+- Login (mock auth + Remember Me)
+- Dashboard stats, charts, recent bookings, quick actions
+- Rooms CRUD with status badges, search, pagination
+- Customers list/detail/edit
+- Bookings create/edit/cancel/checkout with filters
+- Reports with Excel + PDF export
+- Settings (hotel profile, logo preview, dark mode)
+
+## Mock data
+
+- 20 rooms
+- 50 customers
+- 100 bookings
+
+Seed files live in `src/mock/data/`.
