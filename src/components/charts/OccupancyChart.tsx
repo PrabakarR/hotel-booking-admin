@@ -17,9 +17,9 @@ interface OccupancyChartProps {
 
 export function OccupancyChart({ data }: OccupancyChartProps) {
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
+    <div className="h-72 w-full min-w-0 max-w-full">
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="occupancyFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#2563EB" stopOpacity={0.25} />
@@ -29,6 +29,7 @@ export function OccupancyChart({ data }: OccupancyChartProps) {
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
           <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
           <YAxis
+            width={40}
             tickLine={false}
             axisLine={false}
             fontSize={12}

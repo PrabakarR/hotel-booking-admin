@@ -77,7 +77,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ export default function DashboardPage() {
       {statsLoading || !stats ? (
         <StatCardsSkeleton />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <StatCard title="Total Rooms" value={stats.totalRooms} icon={BedDouble} />
           <StatCard
             title="Available Rooms"
@@ -148,12 +148,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card className="rounded-2xl shadow-none">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+        <Card className="min-w-0 rounded-2xl shadow-none">
           <CardHeader>
             <CardTitle className="text-base">Occupancy Rate</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {occupancyLoading || !occupancy ? (
               <ChartSkeleton />
             ) : (
@@ -161,11 +161,11 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card className="rounded-2xl shadow-none">
+        <Card className="min-w-0 rounded-2xl shadow-none">
           <CardHeader>
             <CardTitle className="text-base">Monthly Revenue</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-w-0">
             {revenueLoading || !revenue ? (
               <ChartSkeleton />
             ) : (
@@ -175,8 +175,8 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-3">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-3">
           <h2 className="text-sm font-medium">Recent Bookings</h2>
           {recentLoading || !recent ? (
             <TableSkeleton rows={5} />
@@ -185,7 +185,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <Card className="rounded-2xl shadow-none">
+        <Card className="min-w-0 rounded-2xl shadow-none">
           <CardHeader>
             <CardTitle className="text-base">Upcoming Check Outs</CardTitle>
           </CardHeader>
@@ -198,15 +198,17 @@ export default function DashboardPage() {
               checkouts.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between rounded-2xl border px-3 py-3"
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border px-3 py-3"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{item.customerName}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{item.customerName}</p>
+                    <p className="truncate text-xs text-muted-foreground">
                       Room {item.roomNumber} · {formatDate(item.checkOut)}
                     </p>
                   </div>
-                  <p className="text-sm font-medium">{formatCurrency(item.balance)}</p>
+                  <p className="shrink-0 text-sm font-medium">
+                    {formatCurrency(item.balance)}
+                  </p>
                 </div>
               ))
             )}

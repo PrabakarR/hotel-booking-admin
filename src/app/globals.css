@@ -127,10 +127,10 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground antialiased;
-  }
   html {
-    @apply font-sans;
+    @apply font-sans overflow-x-clip;
+  }
+  body {
+    @apply min-w-0 overflow-x-clip bg-background text-foreground antialiased;
   }
 }

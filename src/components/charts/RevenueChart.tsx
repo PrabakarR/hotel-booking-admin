@@ -18,12 +18,13 @@ interface RevenueChartProps {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data}>
+    <div className="h-72 w-full min-w-0 max-w-full">
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
+        <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
           <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
           <YAxis
+            width={48}
             tickLine={false}
             axisLine={false}
             fontSize={12}

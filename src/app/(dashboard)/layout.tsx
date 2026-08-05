@@ -11,11 +11,11 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-dvh w-full overflow-x-clip bg-background">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+          <main className="min-w-0 flex-1 p-4 md:p-6 lg:p-8">{children}</main>
         </div>
       </div>
     </AuthGuard>
