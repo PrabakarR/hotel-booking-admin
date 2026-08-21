@@ -9,11 +9,14 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
   const port = Number(process.env.PORT ?? 3001);
-  const frontendOrigin = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+  const frontendOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.use(helmet());
   app.enableCors({
-    origin: frontendOrigin,
+    origin: frontendOrigins,
     credentials: true,
   });
   app.setGlobalPrefix('api');

@@ -5,9 +5,10 @@
   "description": "NestJS API for Cedar Ridge Lodge hotel booking admin",
   "scripts": {
     "build": "nest build",
-    "start": "nest start",
+    "dev": "nest start --watch",
+    "start": "nest build && node dist/main.js",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/main.js",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
