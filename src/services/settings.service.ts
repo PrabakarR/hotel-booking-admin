@@ -1,11 +1,11 @@
-import { settingsRepository } from "@/repositories/mock-settings.repository";
-import type { UpdateHotelSettingsInput } from "@/types";
+import { apiClient } from "@/lib/api-client";
+import type { HotelSettings, UpdateHotelSettingsInput } from "@/types";
 
 export const settingsService = {
-  get() {
-    return settingsRepository.get();
+  get(): Promise<HotelSettings> {
+    return apiClient("/settings");
   },
-  update(input: UpdateHotelSettingsInput) {
-    return settingsRepository.update(input);
+  update(input: UpdateHotelSettingsInput): Promise<HotelSettings> {
+    return apiClient("/settings", { method: "PATCH", body: input });
   },
 };

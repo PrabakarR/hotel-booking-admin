@@ -71,8 +71,12 @@ export default function SettingsPage() {
             <form
               className="space-y-4"
               onSubmit={form.handleSubmit(async (values) => {
-                await mutation.mutateAsync(values);
-                toast.success("Settings saved");
+                try {
+                  await mutation.mutateAsync(values);
+                  toast.success("Settings saved");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Unable to save settings");
+                }
               })}
             >
               <div className="grid gap-4 sm:grid-cols-2">

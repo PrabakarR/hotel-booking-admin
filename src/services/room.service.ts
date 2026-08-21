@@ -1,4 +1,4 @@
-import { roomRepository } from "@/repositories/mock-room.repository";
+import { apiClient, toQuery } from "@/lib/api-client";
 import type {
   CreateRoomInput,
   ListQuery,
@@ -8,22 +8,39 @@ import type {
 } from "@/types";
 
 export const roomService = {
-  list(query?: ListQuery): Promise<PaginatedResult<Room>> {
-    return roomRepository.findAll(query);
+  list(query: ListQuery = {}): Promise<PaginatedResult<Room>> {
+    return apiClient(
+      `/rooms${toQuery({
+        search: query.search,
+        page: query.page,
+        pageSize: query.pageSize,
+      })}`
+    );
   },
-  getById(id: string): Promise<Room | null> {
-    return roomRepository.findById(id);
+
+  getById(id: string): Promise<Room> {
+    return apiClient(`/rooms/${id}`);
   },
+
   getAll(): Promise<Room[]> {
-    return roomRepository.getAll();
+    return apiClient("/rooms/all");
   },
+
+  getAvailable(checkIn: string, checkOut: string): Promise<Room[]> {
+    return apiClient(
+      `/rooms/available${toQuery({ checkIn, checkOut })}`
+    );
+  },
+
   create(input: CreateRoomInput): Promise<Room> {
-    return roomRepository.create(input);
+    return apiClient("/rooms", { method: "POST", body: input });
   },
+
   update(id: string, input: UpdateRoomInput): Promise<Room> {
-    return roomRepository.update(id, input);
+    return apiClient(`/rooms/${id}`, { method: "PATCH", body: input });
   },
+
   remove(id: string): Promise<void> {
-    return roomRepository.delete(id);
+    return apiClient(`/rooms/${id}`, { method: "DELETE" });
   },
 };

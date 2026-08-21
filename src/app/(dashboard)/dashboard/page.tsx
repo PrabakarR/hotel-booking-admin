@@ -226,9 +226,13 @@ export default function DashboardPage() {
           loading={create.isPending}
           onCancel={() => setRoomModalOpen(false)}
           onSubmit={async (values) => {
-            await create.mutateAsync(values);
-            toast.success("Room added");
-            setRoomModalOpen(false);
+            try {
+              await create.mutateAsync(values);
+              toast.success("Room added");
+              setRoomModalOpen(false);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Unable to add room");
+            }
           }}
         />
       </Modal>

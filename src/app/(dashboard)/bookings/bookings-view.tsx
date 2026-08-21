@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Eye,
+  LogIn,
   LogOut,
   Pencil,
   Plus,
@@ -49,6 +50,7 @@ export function BookingsView() {
   const [editing, setEditing] = useState<BookingWithRelations | null>(null);
   const [cancelTarget, setCancelTarget] = useState<BookingWithRelations | null>(null);
   const [checkoutTarget, setCheckoutTarget] = useState<BookingWithRelations | null>(null);
+  const [checkInTarget, setCheckInTarget] = useState<BookingWithRelations | null>(null);
 
   const { data, isLoading } = useBookings({
     search,
@@ -62,7 +64,7 @@ export function BookingsView() {
   });
   const { data: rooms = [] } = useAllRooms();
   const { data: customers = [] } = useAllCustomers();
-  const { create, update, cancel, checkout } = useBookingMutations();
+  const { create, update, cancel, checkIn, checkout } = useBookingMutations();
 
   useEffect(() => {
     if (searchParams.get("new") === "1") {
@@ -132,6 +134,15 @@ export function BookingsView() {
               >
                 <Pencil />
               </Button>
+              {booking.status === "booked" ? (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setCheckInTarget(booking)}
+                >
+                  <LogIn />
+                </Button>
+              ) : null}
               {booking.status === "checked_in" ? (
                 <Button
                   variant="ghost"
@@ -283,14 +294,18 @@ export function BookingsView() {
           loading={create.isPending || update.isPending}
           onCancel={() => setModalOpen(false)}
           onSubmit={async (values) => {
-            if (editing) {
-              await update.mutateAsync({ id: editing.id, input: values });
-              toast.success("Booking updated");
-            } else {
-              await create.mutateAsync(values);
-              toast.success("Booking created");
+            try {
+              if (editing) {
+                await update.mutateAsync({ id: editing.id, input: values });
+                toast.success("Booking updated");
+              } else {
+                await create.mutateAsync(values);
+                toast.success("Booking created");
+              }
+              setModalOpen(false);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Unable to save booking");
             }
-            setModalOpen(false);
           }}
         />
       </Modal>
@@ -305,9 +320,32 @@ export function BookingsView() {
         loading={cancel.isPending}
         onConfirm={async () => {
           if (!cancelTarget) return;
-          await cancel.mutateAsync(cancelTarget.id);
-          toast.success("Booking cancelled");
-          setCancelTarget(null);
+          try {
+            await cancel.mutateAsync(cancelTarget.id);
+            toast.success("Booking cancelled");
+            setCancelTarget(null);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to cancel booking");
+          }
+        }}
+      />
+
+      <ConfirmationDialog
+        open={Boolean(checkInTarget)}
+        onOpenChange={(open) => !open && setCheckInTarget(null)}
+        title="Check in guest?"
+        description="Mark this booking as checked in and occupy the room."
+        confirmLabel="Check in"
+        loading={checkIn.isPending}
+        onConfirm={async () => {
+          if (!checkInTarget) return;
+          try {
+            await checkIn.mutateAsync(checkInTarget.id);
+            toast.success("Guest checked in");
+            setCheckInTarget(null);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to check in");
+          }
         }}
       />
 
@@ -320,9 +358,13 @@ export function BookingsView() {
         loading={checkout.isPending}
         onConfirm={async () => {
           if (!checkoutTarget) return;
-          await checkout.mutateAsync(checkoutTarget.id);
-          toast.success("Guest checked out");
-          setCheckoutTarget(null);
+          try {
+            await checkout.mutateAsync(checkoutTarget.id);
+            toast.success("Guest checked out");
+            setCheckoutTarget(null);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to checkout");
+          }
         }}
       />
     </div>

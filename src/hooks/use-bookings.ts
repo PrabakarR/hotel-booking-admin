@@ -47,10 +47,15 @@ export function useBookingMutations() {
     onSuccess: invalidate,
   });
 
+  const checkIn = useMutation({
+    mutationFn: (id: string) => bookingService.checkIn(id),
+    onSuccess: invalidate,
+  });
+
   const checkout = useMutation({
     mutationFn: (id: string) => bookingService.checkout(id),
     onSuccess: invalidate,
   });
 
-  return { create, update, cancel, checkout };
+  return { create, update, cancel, checkIn, checkout };
 }

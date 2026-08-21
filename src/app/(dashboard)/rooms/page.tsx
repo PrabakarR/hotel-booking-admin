@@ -132,14 +132,18 @@ export default function RoomsPage() {
           loading={create.isPending || update.isPending}
           onCancel={() => setModalOpen(false)}
           onSubmit={async (values) => {
-            if (editing) {
-              await update.mutateAsync({ id: editing.id, input: values });
-              toast.success("Room updated");
-            } else {
-              await create.mutateAsync(values);
-              toast.success("Room added");
+            try {
+              if (editing) {
+                await update.mutateAsync({ id: editing.id, input: values });
+                toast.success("Room updated");
+              } else {
+                await create.mutateAsync(values);
+                toast.success("Room added");
+              }
+              setModalOpen(false);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Unable to save room");
             }
-            setModalOpen(false);
           }}
         />
       </Modal>
@@ -154,9 +158,13 @@ export default function RoomsPage() {
         loading={remove.isPending}
         onConfirm={async () => {
           if (!deleting) return;
-          await remove.mutateAsync(deleting.id);
-          toast.success("Room deleted");
-          setDeleting(null);
+          try {
+            await remove.mutateAsync(deleting.id);
+            toast.success("Room deleted");
+            setDeleting(null);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to delete room");
+          }
         }}
       />
     </div>

@@ -1,6 +1,6 @@
-import { bookingRepository } from "@/repositories/mock-booking.repository";
-import { customerRepository } from "@/repositories/mock-customer.repository";
+import { apiClient, toQuery } from "@/lib/api-client";
 import type {
+  BookingWithRelations,
   CreateCustomerInput,
   CustomerWithStats,
   ListQuery,
@@ -9,44 +9,33 @@ import type {
 } from "@/types";
 
 export const customerService = {
-  async list(query?: ListQuery): Promise<PaginatedResult<CustomerWithStats>> {
-    const result = await customerRepository.findAll(query);
-    const bookings = await bookingRepository.getAll();
-    const data = result.data.map((customer) => ({
-      ...customer,
-      previousBookings: bookings.filter((b) => b.customerId === customer.id).length,
-    }));
-    return { ...result, data };
+  list(query: ListQuery = {}): Promise<PaginatedResult<CustomerWithStats>> {
+    return apiClient(
+      `/customers${toQuery({
+        search: query.search,
+        page: query.page,
+        pageSize: query.pageSize,
+      })}`
+    );
   },
 
-  async getById(id: string): Promise<CustomerWithStats | null> {
-    const customer = await customerRepository.findById(id);
-    if (!customer) return null;
-    const bookings = await bookingRepository.findByCustomerId(id);
-    return { ...customer, previousBookings: bookings.length };
+  getById(id: string): Promise<CustomerWithStats> {
+    return apiClient(`/customers/${id}`);
   },
 
-  getAll() {
-    return customerRepository.getAll();
+  getAll(): Promise<CustomerWithStats[]> {
+    return apiClient("/customers/all");
   },
 
   create(input: CreateCustomerInput) {
-    return customerRepository.create(input);
+    return apiClient("/customers", { method: "POST", body: input });
   },
 
   update(id: string, input: UpdateCustomerInput) {
-    return customerRepository.update(id, input);
+    return apiClient(`/customers/${id}`, { method: "PATCH", body: input });
   },
 
-  async getBookings(customerId: string) {
-    const bookings = await bookingRepository.findByCustomerId(customerId);
-    const rooms = await import("@/repositories/mock-room.repository").then(
-      (m) => m.roomRepository.getAll()
-    );
-    const roomList = await rooms;
-    return bookings.map((booking) => ({
-      ...booking,
-      room: roomList.find((room) => room.id === booking.roomId)!,
-    }));
+  getBookings(customerId: string): Promise<BookingWithRelations[]> {
+    return apiClient(`/customers/${customerId}/bookings`);
   },
 };

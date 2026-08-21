@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, LogOut, Pencil, XCircle } from "lucide-react";
+import { ArrowLeft, LogIn, LogOut, Pencil, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -24,10 +24,11 @@ export default function BookingDetailPage() {
   const { data: booking, isLoading } = useBooking(id);
   const { data: rooms = [] } = useAllRooms();
   const { data: customers = [] } = useAllCustomers();
-  const { update, cancel, checkout } = useBookingMutations();
+  const { update, cancel, checkIn, checkout } = useBookingMutations();
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkInOpen, setCheckInOpen] = useState(false);
 
   if (isLoading || !booking) {
     return (
@@ -59,7 +60,7 @@ export default function BookingDetailPage() {
           </Button>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Booking {booking.id}
+              Booking {booking.bookingNumber ?? booking.id}
             </h1>
             <BookingStatusBadge status={booking.status} />
           </div>
@@ -72,6 +73,16 @@ export default function BookingDetailPage() {
             <Pencil className="size-4" />
             Edit
           </Button>
+          {booking.status === "booked" ? (
+            <Button
+              variant="outline"
+              className="rounded-2xl"
+              onClick={() => setCheckInOpen(true)}
+            >
+              <LogIn className="size-4" />
+              Check in
+            </Button>
+          ) : null}
           {booking.status === "checked_in" ? (
             <Button
               variant="outline"
@@ -177,9 +188,13 @@ export default function BookingDetailPage() {
           loading={update.isPending}
           onCancel={() => setEditOpen(false)}
           onSubmit={async (values) => {
-            await update.mutateAsync({ id: booking.id, input: values });
-            toast.success("Booking updated");
-            setEditOpen(false);
+            try {
+              await update.mutateAsync({ id: booking.id, input: values });
+              toast.success("Booking updated");
+              setEditOpen(false);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "Unable to update booking");
+            }
           }}
         />
       </Modal>
@@ -193,9 +208,31 @@ export default function BookingDetailPage() {
         destructive
         loading={cancel.isPending}
         onConfirm={async () => {
-          await cancel.mutateAsync(booking.id);
-          toast.success("Booking cancelled");
-          setCancelOpen(false);
+          try {
+            await cancel.mutateAsync(booking.id);
+            toast.success("Booking cancelled");
+            setCancelOpen(false);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to cancel booking");
+          }
+        }}
+      />
+
+      <ConfirmationDialog
+        open={checkInOpen}
+        onOpenChange={setCheckInOpen}
+        title="Check in guest?"
+        description="Mark this booking as checked in and occupy the room."
+        confirmLabel="Check in"
+        loading={checkIn.isPending}
+        onConfirm={async () => {
+          try {
+            await checkIn.mutateAsync(booking.id);
+            toast.success("Guest checked in");
+            setCheckInOpen(false);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to check in");
+          }
         }}
       />
 
@@ -207,9 +244,13 @@ export default function BookingDetailPage() {
         confirmLabel="Checkout"
         loading={checkout.isPending}
         onConfirm={async () => {
-          await checkout.mutateAsync(booking.id);
-          toast.success("Guest checked out");
-          setCheckoutOpen(false);
+          try {
+            await checkout.mutateAsync(booking.id);
+            toast.success("Guest checked out");
+            setCheckoutOpen(false);
+          } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Unable to checkout");
+          }
         }}
       />
     </div>

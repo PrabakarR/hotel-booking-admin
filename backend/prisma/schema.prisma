@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+}
+
+enum RoomType {
+  STANDARD
+  DELUXE
+  SUITE
+  FAMILY
+  EXECUTIVE
+}
+
+enum BookingStatus {
+  BOOKED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  CARD
+  BANK_TRANSFER
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(STAFF)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id          String     @id @default(uuid()) @db.Uuid
+  roomNumber  String     @unique
+  floor       Int
+  roomType    RoomType
+  capacity    Int
+  price       Decimal    @db.Decimal(10, 2)
+  status      RoomStatus @default(AVAILABLE)
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  bookings    Booking[]
+
+  @@index([roomNumber])
+  @@index([status])
+}
+
+model Customer {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  mobile        String
+  email         String?
+  address       String
+  idProofType   String?
+  idProofNumber String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  bookings      Booking[]
+
+  @@index([mobile])
+  @@index([name])
+}
+
+/// Booking calendar dates are stored as DATE (no time-of-day).
+/// They represent Asia/Kolkata hotel days and are exchanged as YYYY-MM-DD.
+model Booking {
+  id            String        @id @default(uuid()) @db.Uuid
+  bookingNumber String        @unique
+  customerId    String        @db.Uuid
+  roomId        String        @db.Uuid
+  checkIn       DateTime      @db.Date
+  checkOut      DateTime      @db.Date
+  adults        Int
+  children      Int           @default(0)
+  rent          Decimal       @db.Decimal(10, 2)
+  discount      Decimal       @default(0) @db.Decimal(10, 2)
+  gst           Decimal       @default(0) @db.Decimal(10, 2)
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  advanceAmount Decimal       @default(0) @db.Decimal(10, 2)
+  balanceAmount Decimal       @default(0) @db.Decimal(10, 2)
+  paymentMode   PaymentMode
+  status        BookingStatus @default(BOOKED)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  room          Room          @relation(fields: [roomId], references: [id])
+  payments      Payment[]
+
+  @@index([roomId])
+  @@index([customerId])
+  @@index([checkIn])
+  @@index([checkOut])
+  @@index([status])
+  @@index([bookingNumber])
+  @@index([roomId, status, checkIn, checkOut])
+}
+
+model Payment {
+  id                   String      @id @default(uuid()) @db.Uuid
+  bookingId            String      @db.Uuid
+  amount               Decimal     @db.Decimal(10, 2)
+  paymentMode          PaymentMode
+  transactionReference String?
+  notes                String?
+  createdAt            DateTime    @default(now())
+  booking              Booking     @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model HotelSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+  hotelName String
+  logo      String?
+  address   String
+  phone     String
+  email     String
+  gstNumber String
+  currency  String   @default("INR")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

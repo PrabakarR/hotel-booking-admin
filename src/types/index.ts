@@ -29,6 +29,7 @@ export interface Customer {
 
 export interface Booking {
   id: string;
+  bookingNumber?: string;
   customerId: string;
   roomId: string;
   checkIn: string;

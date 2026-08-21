@@ -19,6 +19,14 @@ export function useAllRooms() {
   });
 }
 
+export function useAvailableRooms(checkIn?: string, checkOut?: string) {
+  return useQuery({
+    queryKey: ["rooms", "available", checkIn, checkOut],
+    queryFn: () => roomService.getAvailable(checkIn!, checkOut!),
+    enabled: Boolean(checkIn && checkOut),
+  });
+}
+
 export function useRoomMutations() {
   const queryClient = useQueryClient();
 

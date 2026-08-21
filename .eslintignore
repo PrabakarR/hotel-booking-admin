@@ -1,0 +1,6 @@
+node_modules
+# Keep backend artifacts out of Next.js lint/typecheck
+backend
+.next
+out
+build

@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BOOKING_STATUSES, GST_RATE, PAYMENT_METHODS } from "@/lib/constants";
 import { calculateBookingTotals, formatCurrency, nightsBetween } from "@/lib/format";
 import { bookingSchema, type BookingFormValues } from "@/schemas";
+import { useAvailableRooms } from "@/hooks/use-rooms";
 import type { Booking, Customer, Room } from "@/types";
 
 interface BookingFormProps {
@@ -63,17 +64,23 @@ export function BookingForm({
   const discount = form.watch("discount");
   const gst = form.watch("gst");
   const advance = form.watch("advance");
+  const { data: availableRooms } = useAvailableRooms(
+    !initialData && checkIn && checkOut ? checkIn : undefined,
+    !initialData && checkIn && checkOut ? checkOut : undefined
+  );
+  const roomOptions =
+    !initialData && checkIn && checkOut ? (availableRooms ?? rooms) : rooms;
 
   useEffect(() => {
     if (!roomId || !checkIn || !checkOut || initialData) return;
-    const room = rooms.find((item) => item.id === roomId);
+    const room = rooms.find((item) => item.id === roomId) ?? roomOptions.find((item) => item.id === roomId);
     if (!room) return;
     const nights = nightsBetween(checkIn, checkOut);
     const nextPrice = room.price * nights;
     const nextGst = Math.round((nextPrice - (form.getValues("discount") || 0)) * GST_RATE);
     form.setValue("price", nextPrice);
     form.setValue("gst", nextGst);
-  }, [roomId, checkIn, checkOut, rooms, form, initialData]);
+  }, [roomId, checkIn, checkOut, rooms, roomOptions, form, initialData]);
 
   useEffect(() => {
     if (!price) return;
@@ -132,7 +139,7 @@ export function BookingForm({
               <SelectValue placeholder="Select room" />
             </SelectTrigger>
             <SelectContent>
-              {rooms.map((room) => (
+              {roomOptions.map((room) => (
                 <SelectItem key={room.id} value={room.id}>
                   {room.roomNumber} · {room.roomType} · {formatCurrency(room.price)}
                 </SelectItem>

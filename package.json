@@ -4,9 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:frontend": "next dev",
+    "dev:backend": "npm run start:dev --prefix backend",
     "build": "next build",
+    "build:backend": "npm run build --prefix backend",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prisma:generate": "npm run prisma:generate --prefix backend",
+    "prisma:migrate": "npm run prisma:migrate --prefix backend",
+    "prisma:seed": "npm run prisma:seed --prefix backend",
+    "test:backend": "npm test --prefix backend"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
